@@ -1,0 +1,96 @@
+{
+  "expo": {
+    "name": "akj",
+    "scheme": "akj",
+    "version": "1.0.15",
+    "description": "akj",
+    "slug": "akj",
+    "owner": "brightechsoftware",
+    "privacy": "public",
+    "androidStatusBar": {
+      "backgroundColor": "#000000"
+    },
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "userInterfaceStyle": "automatic",
+      "bundleIdentifier": "com.Smartkal.founder",
+      "config": {
+        "googleMapsApiKey": "###### Key #######"
+      },
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to use location to determine the delivery address for your orders.",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "NSUserTrackingUsageDescription": "Allow this app to collect app-related data that can be used for tracking you or your device.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.967541328677-nf8h4ou7rhmq9fahs87p057rggo95eah"
+            ]
+          }
+        ]
+      }
+    },
+    "android": {
+      "versionCode": 6,
+      "package": "com.Smartkal.founder",
+      "googleServicesFile": "./google-services.json",
+      "userInterfaceStyle": "automatic",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCcm7_Wd7uvmC9YnYLu2JHGWPt6z1MaL1E"
+        }
+      },
+      "permissions": [
+      ]
+    },
+    "plugins": [
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "Allow this app to collect app-related data that can be used for tracking you or your device."
+        }
+      ],
+      [
+        "expo-updates",
+        {
+          "username": "zeenathshameena"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow akj to use your location."
+        }
+      ]
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3f402d8f-7425-4fec-940b-963a4f4c8bd6"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d2a9965c-02b0-4386-be42-b99fe9eff162"
+      }
+    }
+  }
+}
