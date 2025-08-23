@@ -119,7 +119,6 @@ const AddNewMember = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [companyData, setCompanyData] = useState(null);
     const [cities, setCities] = useState([]); // Add cities state
-    const [validationErrors, setValidationErrors] = useState({});
 
     const handleBack = () => {
         navigation.navigate('MainLanding');
@@ -143,166 +142,6 @@ const AddNewMember = () => {
             setSelectedSchemeId(schemeId);
         }
     }, [schemeId]);
-
-    // Fetch cities when pincode changes
-    useEffect(() => {
-        const fetchCitiesForPincode = async () => {
-            if (pincode && pincode.length === 6) {
-                try {
-                    const response = await fetch(`https://api.zippopotam.us/in/${pincode}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        const cityList = data.places.map(place => place['place name']);
-                        setCities(cityList);
-                        
-                        // Auto-fill state if available
-                        if (data.places && data.places.length > 0) {
-                            const stateName = data.places[0]['state'];
-                            setSelectedState(stateName);
-                            
-                            // If current city is not in the list, clear it
-                            if (city && !cityList.includes(city)) {
-                                setCity('');
-                            }
-                        }
-                    } else {
-                        setCities([]);
-                        setCity('');
-                        setSelectedState('');
-                    }
-                } catch (error) {
-                    console.error('Error fetching cities:', error);
-                    setCities([]);
-                    setCity('');
-                    setSelectedState('');
-                }
-            } else {
-                setCities([]);
-                setCity('');
-                setSelectedState('');
-            }
-        };
-
-        fetchCitiesForPincode();
-    }, [pincode]);
-
-    // Add these validation functions at the top level
-    const validatePAN = (pan) => {
-        // PAN format: ABCDE1234F
-        const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-        if (!pan) return 'PAN Number is required';
-        if (!panRegex.test(pan)) return 'Invalid PAN format. Should be like ABCDE1234F';
-        return '';
-    };
-
-    const validateAadhaar = (aadhaar) => {
-        // Aadhaar format: 12 digits
-        const aadhaarRegex = /^\d{12}$/;
-        if (!aadhaar) return 'Aadhaar Number is required';
-        if (!aadhaarRegex.test(aadhaar)) return 'Aadhaar should be 12 digits';
-        
-        // Verify checksum (last digit)
-        const digits = aadhaar.split('').map(Number);
-        const lastDigit = digits.pop();
-        const sum = digits.reduce((acc, digit, index) => {
-            return acc + (index % 2 === 0 ? digit : digit * 2);
-        }, 0);
-        const checksum = (10 - (sum % 10)) % 10;
-        
-        if (checksum !== lastDigit) {
-            return 'Invalid Aadhaar number (checksum failed)';
-        }
-        return '';
-    };
-
-    // Update the validateStep1 function
-    const validateStep1 = () => {
-        const errors = {};
-
-        // Check required fields
-        if (!initial.trim()) errors.initial = 'Initial is required';
-        if (!name.trim()) errors.name = 'First Name is required';
-        if (!surname.trim()) errors.surname = 'Surname is required';
-        if (!doorNo.trim()) errors.doorNo = 'Door No is required';
-        if (!address1.trim()) errors.address1 = 'Address 1 is required';
-        if (!area.trim()) errors.area = 'Area is required';
-        if (!city.trim()) errors.city = 'City is required';
-        if (!selectedState) errors.selectedState = 'State is required';
-        if (!country.trim()) errors.country = 'Country is required';
-        if (!pincode.trim()) errors.pincode = 'Pincode is required';
-        if (!mobile.trim()) errors.mobile = 'Mobile number is required';
-        if (dateText === 'Select Date') errors.dob = 'Date of Birth is required';
-        if (!email.trim()) errors.email = 'Email is required';
-        if (!panNumber.trim()) errors.panNumber = 'PAN Number is required';
-        if (!aadharNumber.trim()) errors.aadharNumber = 'Aadhaar Number is required';
-
-        // Validate formats
-        if (pincode && !/^\d{6}$/.test(pincode)) {
-            errors.pincode = 'Please enter a valid 6-digit pincode';
-        } else if (pincode && cities.length === 0) {
-            errors.pincode = 'Please enter a valid pincode';
-        }
-
-        if (mobile && !/^[6-9]\d{9}$/.test(mobile)) {
-            errors.mobile = 'Please enter a valid 10-digit mobile number starting with 6-9';
-        }
-
-        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            errors.email = 'Please enter a valid email address';
-        }
-
-        // Enhanced PAN validation
-        const panError = validatePAN(panNumber);
-        if (panError) {
-            errors.panNumber = panError;
-        }
-
-        // Enhanced Aadhaar validation
-        const aadhaarError = validateAadhaar(aadharNumber);
-        if (aadhaarError) {
-            errors.aadharNumber = aadhaarError;
-        }
-
-        if (country !== 'India') {
-            errors.country = 'Country should be India';
-        }
-
-        // Validate city against available cities for the pincode
-        if (city && cities.length > 0 && !cities.includes(city)) {
-            errors.city = 'Please select a valid city for this pincode';
-        }
-
-        // Validate age (must be at least 18 years old)
-        if (dob) {
-            const today = new Date();
-            const birthDate = new Date(dob);
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            
-            if (age < 18) {
-                errors.dob = 'Member must be at least 18 years old';
-            }
-        }
-
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    // Validation function for Step 2
-    const validateStep2 = () => {
-        const errors = {};
-
-        if (!selectedSchemeId) errors.scheme = 'Please select a scheme';
-        if (!amount) errors.amount = 'Please select an amount';
-        if (!accCode) errors.accCode = 'Please select a payment mode';
-
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
 
     // Fetch schemes when the component mounts
     useEffect(() => {
@@ -409,14 +248,57 @@ const AddNewMember = () => {
             console.log('Form is already submitting...');
             return;
         }
+    
+        setIsSubmitting(true);
 
-        // Validate Step 2 before submitting
-        if (!validateStep2()) {
-            Alert.alert('Validation Error', 'Please fill all required fields correctly.');
+        // Pincode validation (6 digits)
+        if (!/^\d{6}$/.test(pincode)) {
+            Alert.alert('Error', 'Please enter a valid 6-digit pincode.');
+            setIsSubmitting(false);
             return;
         }
     
-        setIsSubmitting(true);
+        // Mobile number validation (10 digits, starting with 6-9)
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            Alert.alert('Error', 'Please enter a valid 10-digit mobile number starting with 6-9.');
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // PAN number validation (5 uppercase letters, 4 numbers, 1 uppercase letter)
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
+            alert('Please enter a valid PAN number (e.g., ABCDE1234F).');
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // Aadhaar validation (12 digits)
+        if (!/^\d{12}$/.test(aadharNumber)) {
+            alert('Please enter a valid 12-digit Aadhaar number.');
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Email validation
+        if (!email.includes('@')) {
+            alert('Email should contain "@" symbol.');
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // Country validation (ensure country is India)
+        if (country !== 'India') {
+            alert('Country should be India.');
+            setIsSubmitting(false);
+            return;
+        }
+    
+        // City validation (check if city is valid from the list of cities)
+        if (cities.length === 0 || !cities.includes(city)) {
+            alert('Please select a valid city from the list of cities for the given pincode.');
+            setIsSubmitting(false);
+            return;
+        }
     
         // Prepare the request body
         const newMember = {
@@ -483,7 +365,7 @@ const AddNewMember = () => {
     
             alert('Member added successfully!');
             resetFormFields();
-            navigation.navigate('MainLanding');
+            navigation.navigate('VerifyMpinScreen');
     
         } catch (error) {
             console.error('Error:', error);
@@ -521,7 +403,6 @@ const AddNewMember = () => {
         setAccCode('');
         setModepay('C');
         setSelectedSchemeId(null);
-        setValidationErrors({});
     };
 
     useEffect(() => {
@@ -551,14 +432,6 @@ const AddNewMember = () => {
         setShowDatePicker(true);
     };
 
-    const handleNextStep = () => {
-        if (validateStep1()) {
-            setCurrentStep(2);
-        } else {
-            Alert.alert('Validation Error', 'Please fill all required fields correctly.');
-        }
-    };
-
     const renderDatePicker = () => {
         return (
             <View>
@@ -568,15 +441,12 @@ const AddNewMember = () => {
                 
                 <TouchableOpacity 
                     onPress={showPicker} 
-                    style={[styles.dateInput, validationErrors.dob && styles.inputError]}
+                    style={styles.dateInput}
                 >
                     <Text style={dateText === 'Select Date' ? styles.placeholderText : styles.dateText}>
                         {dateText}
                     </Text>
                 </TouchableOpacity>
-                {validationErrors.dob && (
-                    <Text style={styles.errorText}>{validationErrors.dob}</Text>
-                )}
 
                 {showDatePicker && (
                     <DateTimePicker
@@ -593,37 +463,6 @@ const AddNewMember = () => {
         );
     };
 
-    // Update city input to be a picker when cities are available
-    const renderCityInput = () => {
-        if (cities.length > 0) {
-            return (
-                <View style={[styles.pickerWrapper, validationErrors.city && styles.inputError]}>
-                    <CustomPicker
-                        selectedValue={city}
-                        onValueChange={(value) => setCity(value)}
-                        items={[
-                            { label: "Select a City", value: "" },
-                            ...cities.map(cityName => ({ label: cityName, value: cityName }))
-                        ]}
-                        placeholder="Select a City"
-                    />
-                </View>
-            );
-        }
-
-        return (
-            <View style={[styles.inputWrapper, validationErrors.city && styles.inputError]}>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setCity}
-                    value={city}
-                    placeholder="Enter City"
-                    editable={cities.length === 0}
-                />
-            </View>
-        );
-    };
-
     const renderStep = () => {
         switch (currentStep) {
             case 1:
@@ -635,64 +474,49 @@ const AddNewMember = () => {
                         />
                         
                         <Text style={styles.label}>Initial  <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.initial && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setInitial}
                             value={initial}
                             placeholder="Enter Initial"
                         /></View>
-                        {validationErrors.initial && (
-                            <Text style={styles.errorText}>{validationErrors.initial}</Text>
-                        )}
                         
                         <Text style={styles.label}>First Name <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.name && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setName}
                             value={name}
                             placeholder="Enter First Name"
                         /></View>
-                        {validationErrors.name && (
-                            <Text style={styles.errorText}>{validationErrors.name}</Text>
-                        )}
                         
                         <Text style={styles.label}>Surname <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.surname && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setSurname}
                             value={surname}
                             placeholder="Enter Surname"
                         /></View>
-                        {validationErrors.surname && (
-                            <Text style={styles.errorText}>{validationErrors.surname}</Text>
-                        )}
                         
                         <Text style={styles.label}>Door No <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.doorNo && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setDoorNo}
                             value={doorNo}
                             placeholder="Enter Door No"
                         /></View>
-                        {validationErrors.doorNo && (
-                            <Text style={styles.errorText}>{validationErrors.doorNo}</Text>
-                        )}
                         
                         <Text style={styles.label}>Address 1 <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.address1 && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setAddress1}
                             value={address1}
                             placeholder="Enter Address 1"
                         /></View>
-                        {validationErrors.address1 && (
-                            <Text style={styles.errorText}>{validationErrors.address1}</Text>
-                        )}
                         
                         <Text style={styles.label}>Address 2</Text>
                         <View style={styles.inputWrapper}>
@@ -704,44 +528,25 @@ const AddNewMember = () => {
                         /></View>
                         
                         <Text style={styles.label}>Area <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.area && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setArea}
                             value={area}
                             placeholder="Enter Area"
                         /></View>
-                        {validationErrors.area && (
-                            <Text style={styles.errorText}>{validationErrors.area}</Text>
-                        )}
-                        
-                        <Text style={styles.label}>Pincode <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.pincode && styles.inputError]}>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={setPincode}
-                            value={pincode}
-                            placeholder="Enter Pincode"
-                            keyboardType="numeric"
-                            maxLength={6}
-                        /></View>
-                        {validationErrors.pincode && (
-                            <Text style={styles.errorText}>{validationErrors.pincode}</Text>
-                        )}
                         
                         <Text style={styles.label}>City <Text style={styles.asterisk}>*</Text></Text>
-                        {renderCityInput()}
-                        {validationErrors.city && (
-                            <Text style={styles.errorText}>{validationErrors.city}</Text>
-                        )}
-                        {cities.length > 0 && (
-                            <Text style={styles.hintText}>
-                                Available cities for this pincode: {cities.join(', ')}
-                            </Text>
-                        )}
+                        <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setCity}
+                            value={city}
+                            placeholder="Enter City"
+                        /></View>
                        
                         <Text style={styles.label}>State <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.pickerWrapper, validationErrors.selectedState && styles.inputError]}>
+                        <View style={styles.pickerWrapper}>
                             <CustomPicker
                                 selectedValue={selectedState}
                                 onValueChange={(itemValue) => setSelectedState(itemValue)}
@@ -752,24 +557,28 @@ const AddNewMember = () => {
                                 placeholder="Select a State"
                             />
                         </View>
-                        {validationErrors.selectedState && (
-                            <Text style={styles.errorText}>{validationErrors.selectedState}</Text>
-                        )}
                         
                         <Text style={styles.label}>Country <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.country && styles.inputError]}>
+                        <View style={styles.inputWrapper}>
                         <TextInput
                             style={styles.input}
                             onChangeText={setCountry}
                             value={country}
                             placeholder="Enter Country"
                         /></View>
-                        {validationErrors.country && (
-                            <Text style={styles.errorText}>{validationErrors.country}</Text>
-                        )}
+                        
+                        <Text style={styles.label}>Pincode <Text style={styles.asterisk}>*</Text></Text>
+                        <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setPincode}
+                            value={pincode}
+                            placeholder="Enter Pincode"
+                            keyboardType="numeric"
+                        /></View>
                         
                         <Text style={styles.label}>Mobile Number <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, (validationErrors.mobile || !isMobileValid) && styles.inputError]}>
+                        <View style={[styles.inputWrapper, !isMobileValid && styles.inputError]}>
                             <View style={styles.mobileInputContainer}>
                                 <Text style={styles.countryCode}>+91</Text>
                                 <TextInput
@@ -781,12 +590,10 @@ const AddNewMember = () => {
                                     maxLength={10}
                                 />
                             </View>
+                            {!isMobileValid && mobile.length > 0 && (
+                                <Text style={styles.errorText}>Please enter a valid 10-digit mobile number starting with 6-9</Text>
+                            )}
                         </View>
-                        {(validationErrors.mobile || (!isMobileValid && mobile.length > 0)) && (
-                            <Text style={styles.errorText}>
-                                {validationErrors.mobile || 'Please enter a valid 10-digit mobile number starting with 6-9'}
-                            </Text>
-                        )}
                         
                         {renderDatePicker()}
                         
@@ -800,54 +607,23 @@ const AddNewMember = () => {
                         /></View>
                         
                         <Text style={styles.label}>PAN Number <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.panNumber && styles.inputError]}>
-                            <TextInput
-                                style={styles.input}
-                                onChangeText={(text) => {
-                                    setPanNumber(text.toUpperCase());
-                                    // Clear error when user starts typing
-                                    if (validationErrors.panNumber) {
-                                        setValidationErrors(prev => ({
-                                            ...prev,
-                                            panNumber: ''
-                                        }));
-                                    }
-                                }}
-                                value={panNumber}
-                                placeholder="Enter PAN Number (e.g., ABCDE1234F)"
-                                maxLength={10}
-                                autoCapitalize="characters"
-                            />
-                        </View>
-                        {validationErrors.panNumber && (
-                            <Text style={styles.errorText}>{validationErrors.panNumber}</Text>
-                        )}
+                        <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setPanNumber}
+                            value={panNumber}
+                            placeholder="Enter PAN Number"
+                        /></View>
                         
                         <Text style={styles.label}>Aadhaar Number <Text style={styles.asterisk}>*</Text></Text>
-                        <View style={[styles.inputWrapper, validationErrors.aadharNumber && styles.inputError]}>
-                            <TextInput
-                                style={styles.input}
-                                onChangeText={(text) => {
-                                    // Only allow numbers
-                                    const numericValue = text.replace(/[^0-9]/g, '');
-                                    setAadharNumber(numericValue);
-                                    // Clear error when user starts typing
-                                    if (validationErrors.aadharNumber) {
-                                        setValidationErrors(prev => ({
-                                            ...prev,
-                                            aadharNumber: ''
-                                        }));
-                                    }
-                                }}
-                                value={aadharNumber}
-                                placeholder="Enter 12-digit Aadhaar Number"
-                                keyboardType="numeric"
-                                maxLength={12}
-                            />
-                        </View>
-                        {validationErrors.aadharNumber && (
-                            <Text style={styles.errorText}>{validationErrors.aadharNumber}</Text>
-                        )}
+                        <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={setAadharNumber}
+                            value={aadharNumber}
+                            placeholder="Enter Aadhaar Number"
+                            keyboardType="numeric"
+                        /></View>
                         
                         <View style={styles.buttonRow}>
                             <TouchableOpacity style={[styles.button, styles.backButton]} onPress={handleBack}>
@@ -966,11 +742,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 5,
     },
+    title: {
+        fontSize: 16,
+        justifyContent: 'center',
+        alignSelf: 'center',
+        fontWeight: 'bold'
+    },
     inputWrapper: {
-        backgroundColor: colors.white,
+        backgroundColor: colors.white, // Background color for the shadow to appear
         borderRadius: 10,
-        elevation: 6,
-        shadowColor: colors.greenColor,
+        elevation: 6, // Shadow for Android
+        shadowColor: colors.greenColor, // Shadow for iOS
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 6,
@@ -982,7 +764,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         paddingHorizontal: 10,
-        backgroundColor: colors.white,
+        backgroundColor: colors.white, // Keep the background consistent
+        
+    },
+    picker: {
+        height: 60,
+        width: '100%',
+        marginBottom: 15,
     },
     pickerWrapper: {
         height: 60,
@@ -1003,21 +791,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 20,
-    },
+      },
     button: {
         backgroundColor: colors.greenColor,
         flex: 1,
-        paddingVertical: 10,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginHorizontal: 5,
-        height: 60,
-        padding: 20,
-        justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginHorizontal: 5,
+    height: 60,
+    padding: 20,
+     justifyContent: 'center',
         alignSelf: 'center'
     },
     buttonText: {
-        color: colors.fontMainColor,
+        color:colors.fontMainColor,
         fontSize: 16,
         fontWeight: 'bold'
     },
@@ -1030,13 +818,24 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     buttonDisabled: {
-        backgroundColor: Color.blue + '80',
+        backgroundColor: Color.blue + '80', // Add transparency to show disabled state
         opacity: 0.8,
     },
-    asterisk: {
+    text: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.black,
+      },
+      schemeText: {
+        fontSize: 16,
+        color: colors.greenColor,
+        marginTop: -10,
+        ...alignment.PxSmall
+      },
+      asterisk: {
         color: colors.yellow,
         fontSize: 16,
-    },
+      },
     mobileInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -1095,9 +894,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         height: 60,
+       
         borderColor: colors.greenColor,
         borderRadius: 10,
         paddingHorizontal: 15,
+        
+       
     },
     pickerText: {
         fontSize: 16,
@@ -1168,13 +970,6 @@ const styles = StyleSheet.create({
     selectedModalItemText: {
         color: colors.greenColor,
         fontWeight: 'bold',
-    },
-    hintText: {
-        color: colors.greenColor,
-        fontSize: 12,
-        marginTop: 5,
-        marginBottom: 15,
-        fontStyle: 'italic',
     },
 });
 

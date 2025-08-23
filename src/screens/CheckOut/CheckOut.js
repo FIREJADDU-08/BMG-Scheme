@@ -1,8 +1,6 @@
 // TermsConditionsPage.js
 import React from 'react';
-import { Image, ImageBackground, StyleSheet, View, Text, Platform, ToastAndroid } from 'react-native';
-import { showToast } from '../../utils/toast';
-
+import { Image, ImageBackground, StyleSheet, View,Text } from 'react-native';
 const TermsConditionsPage = () => {
 
     let razorpayKeyId = 'abc'
@@ -13,7 +11,7 @@ const TermsConditionsPage = () => {
 
     const handlePayment = () => {
         if (!RazorpayCheckout) {
-            showToast('Razorpay SDK is not available!');
+            alert('Razorpay SDK is not available!');
             return;
         }
     
@@ -34,11 +32,13 @@ const TermsConditionsPage = () => {
         }
     
         RazorpayCheckout.open(options).then((data) => {
-            showToast(`Payment successful: ${data.razorpay_payment_id}`);
+            // handle success
+            alert(`Success: ${data.razorpay_payment_id}`);
         })
         .catch((error) => {
+            // handle failure
             console.log(error)
-            showToast(`Payment failed: ${error.code} | ${error.description}`);
+            alert(`Error: ${error.code} | ${error.description}`);
         })
     }
     

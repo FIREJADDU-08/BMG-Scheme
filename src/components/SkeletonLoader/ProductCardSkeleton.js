@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import SkeletonLoader from './SkeletonLoader';
-import { scale, verticalScale, colors } from '../../utils';
+import { scale, verticalScale } from '../../utils';
 
 const ProductCardSkeleton = () => {
   return (
@@ -38,12 +38,12 @@ const ProductCardSkeleton = () => {
 const styles = StyleSheet.create({
   container: {
     padding: scale(15),
-    backgroundColor: colors.whiteColor,
+    backgroundColor: 'white',
     borderRadius: 10,
     marginVertical: verticalScale(8),
     marginHorizontal: scale(10),
     elevation: 3,
-    shadowColor: colors.black,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   darkSkeleton: {
-    backgroundColor: colors.brownColor,
+    backgroundColor: '#E0E0E0',
   },
   mediumSkeleton: {
-    backgroundColor: colors.lightpink,
+    backgroundColor: '#D0D0D0',
   },
   lightSkeleton: {
-    backgroundColor: colors.lightyellow,
+    backgroundColor: '#C0C0C0',
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Animated, Image, View, FlatList, Text, ScrollView, TouchableOpacity, ImageBackground, Alert, ToastAndroid, Platform } from 'react-native';
+import { Animated, Image, View, FlatList, Text, ScrollView, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTab, TextDefault, Slider } from '../../components';
 import GoldPlan from '../../ui/ProductCard/GoldPlans';
@@ -10,17 +10,6 @@ import { verticalScale, scale, colors } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProductCardSkeleton from '../../components/SkeletonLoader/ProductCardSkeleton';
 import GoldPlansSkeleton from '../../components/SkeletonLoader/GoldPlansSkeleton';
-
-// Toast function for iOS
-const showToast = (message) => {
-  if (Platform.OS === 'android') {
-    ToastAndroid.show(message, ToastAndroid.SHORT);
-  } else {
-    // For iOS, you can use a third-party toast library or implement a custom toast
-    // For now, we'll use Alert as fallback
-    Alert.alert('', message);
-  }
-};
 
 function MainLanding() {
   const navigation = useNavigation();
@@ -35,39 +24,8 @@ function MainLanding() {
   const [status, setStatus] = useState(true);
 
   const [error, setError] = useState(null);
-  const [animationsRunning, setAnimationsRunning] = useState(false);
 
-  // Animation values
-  const goldAnimation = useRef(new Animated.Value(0)).current;
-  const silverAnimation = useRef(new Animated.Value(0)).current;
-
-  // Create animated styles for coins
-  const createAnimatedStyle = (animatedValue) => {
-    const rotateY = animatedValue.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['0deg', '180deg', '360deg'],
-    });
-
-    const scale = animatedValue.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, 0.6, 1],
-    });
-
-    const opacity = animatedValue.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, 0.3, 1],
-    });
-
-    return {
-      transform: [
-        { perspective: 1000 },
-        { rotateY },
-        { scale }
-      ],
-      opacity,
-    };
-  };
-
+  
   useEffect(() => {
 
     const fetchPhoneSearchData = async () => {
@@ -110,7 +68,6 @@ function MainLanding() {
               }
 
               const accountData = await accountResponse.json();
-              console.log(accountData,'accountData')
 
               const amountWeightResponse = await fetch(
                 `https://akj.brightechsoftware.com/v1/api/getAmountWeight?REGNO=${item.regno}&GROUPCODE=${item.groupcode}`,
@@ -177,8 +134,8 @@ function MainLanding() {
         console.error('Detailed fetch error:', err);
         setError(`Failed fetch data: ${err.message}`);
 
-        // Replace Alert with Toast
-        showToast(`Failed to load data: ${err.message}`);
+        // Optional: Show an alert to the user
+        Alert.alert('Fetch Error', `Failed to load data: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -186,72 +143,60 @@ function MainLanding() {
 
     fetchPhoneSearchData();
   }, []);
+  // Animation values
+  const goldAnimation = useRef(new Animated.Value(0)).current;
+  const silverAnimation = useRef(new Animated.Value(0)).current;
+
+  // Create animated styles for coins
+  const createAnimatedStyle = (animatedValue) => {
+    const rotateY = animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '180deg'],
+    });
+
+    const scale = animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.9],
+    });
+
+    const opacity = animatedValue.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [1, 0.5, 1],
+    });
+
+    return {
+      transform: [{ rotateY }, { scale }],
+      opacity,
+    };
+  };
 
   // Start animations
   useEffect(() => {
-    console.log('Starting continuous left-right coin flip animations...');
-    
     const animateGold = Animated.loop(
       Animated.timing(goldAnimation, {
         toValue: 1,
-        duration: 1000,
+        duration: 2000,
         useNativeDriver: true,
-      }),
-      { iterations: -1 }
+      })
     );
 
     const animateSilver = Animated.loop(
       Animated.timing(silverAnimation, {
         toValue: 1,
-        duration: 1000,
+        duration: 2000,
         useNativeDriver: true,
-      }),
-      { iterations: -1 }
+      })
     );
 
-    // Start animations with error handling
-    try {
-      animateGold.start((finished) => {
-        if (finished) {
-          console.log('Gold animation finished, restarting...');
-          animateGold.start();
-        }
-      });
-      
-      // Start silver animation with a delay for alternating effect
-      setTimeout(() => {
-        animateSilver.start((finished) => {
-          if (finished) {
-            console.log('Silver animation finished, restarting...');
-            animateSilver.start();
-          }
-        });
-      }, 500);
-      
-      setAnimationsRunning(true);
-      console.log('Continuous left-right coin flip animations started successfully');
-    } catch (error) {
-      console.error('Error starting animations:', error);
-      setError('Animation failed to start');
-    }
+    animateGold.start();
+    setTimeout(() => animateSilver.start(), 1000);
 
     return () => {
-      console.log('Component unmounting - stopping animations...');
-      setAnimationsRunning(false);
-      animateGold.stop();
-      animateSilver.stop();
+      goldAnimation.stopAnimation();
+      silverAnimation.stopAnimation();
     };
   }, []);
 
-  // Monitor animations and restart if needed
-  useEffect(() => {
-    if (!animationsRunning) {
-      console.log('Animations not running, attempting to restart...');
-      // Force restart animations
-      goldAnimation.setValue(0);
-      silverAnimation.setValue(0);
-    }
-  }, [animationsRunning]);
 
   // Fetch rates
   const fetchRates = async () => {

@@ -24,7 +24,7 @@ const SkeletonLoader = ({ width, height, style }) => {
 
   const opacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.3, 0.7],
+    outputRange: [0.2, 0.5],
   });
 
   return (
@@ -44,14 +44,14 @@ const SkeletonLoader = ({ width, height, style }) => {
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: colors.lightBrown,
+    backgroundColor: '#E0E0E0',
     borderRadius: 8,
-    shadowColor: colors.black,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },

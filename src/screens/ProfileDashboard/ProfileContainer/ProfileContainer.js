@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   TouchableOpacity,
   View,
+  Image,
   ScrollView,
   ImageBackground,
   Alert,
@@ -11,6 +12,7 @@ import styles from './styles';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TextDefault } from '../../../components';
+import profileImage from '../../../assets/profileimage.jpg';
 import { colors } from '../../../utils';
 
 function ProfileContainer(props) {
@@ -79,42 +81,60 @@ function ProfileContainer(props) {
   };
 
   return (
-    <>
-      {/* Profile Icon and Name */}
-      <View style={styles.profileSection}>
-        <View style={styles.profileIconContainer}>
-          <MaterialIcons name="account-circle" size={100} color={colors.greenColor} />
-        </View>
-        <TextDefault style={styles.profileName} H4>
-          {userName}
-        </TextDefault>
-        <View style={styles.phoneContainer}>
-          <MaterialIcons name="phone" size={20} color={colors.greenColor} style={styles.phoneIcon} />
-          <TextDefault style={styles.phoneNumber} H5>
-            {userPhone}
+    <ImageBackground
+      source={require('../../../assets/bg.jpg')}
+      style={styles.backgroundImage}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Profile Picture and Name */}
+        <View style={styles.profileSection}>
+          <Image source={profileImage} style={styles.profileImage} />
+          <TextDefault style={styles.profileName} H4>
+            {userName}
           </TextDefault>
+          <View style={styles.phoneContainer}>
+            <MaterialIcons name="phone" size={20} color={colors.greenColor} style={styles.phoneIcon} />
+            <TextDefault style={styles.phoneNumber} H5>
+              {userPhone}
+            </TextDefault>
+          </View>
         </View>
-      </View>
 
-      {/* Settings Options */}
-      <View style={styles.settingsSection}>
-        {[ 
-          { label: 'My Scheme', icon: 'list', route: 'MyScheme' },
-          { label: 'Help Center', icon: 'help', route: 'HelpCenter' },
-          { label: 'Privacy Policy', icon: 'security', route: 'PrivacyPolicy' },
-          { label: 'Terms and Condition', icon: 'lock', route: 'TermsandCondition' },
-          // { label: 'Delete', icon: 'delete', route: 'DeleteButton' },
-        ].map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.settingsItem}
-            onPress={() => navigation.navigate(item.route)}
-          >
+        {/* Settings Options */}
+        <View style={styles.settingsSection} H5>
+          {[ 
+            { label: 'My Scheme', icon: 'list', route: 'MyScheme' },
+            { label: 'Help Center', icon: 'help', route: 'HelpCenter' },
+            { label: 'Privacy Policy', icon: 'security', route: 'PrivacyPolicy' },
+            { label: 'Terms and Condition', icon: 'lock', route: 'TermsandCondition' },
+            { label: 'Delete', icon: 'delete', route: 'DeleteButton' },
+          ].map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.settingsItem}
+              onPress={() => navigation.navigate(item.route)}
+            >
+              <View style={styles.settingsItemIcon}>
+                <MaterialIcons name={item.icon} size={24} color={colors.greenColor} />
+              </View>
+              <TextDefault style={styles.settingsItemText} H5>
+                {item.label}
+              </TextDefault>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={20}
+                color={colors.greenColor}
+              />
+            </TouchableOpacity>
+          ))}
+
+          {/* Logout Option */}
+          <TouchableOpacity style={styles.settingsItem} onPress={handleLogout}>
             <View style={styles.settingsItemIcon}>
-              <MaterialIcons name={item.icon} size={24} color={colors.greenColor} />
+              <MaterialIcons name="logout" size={24} color={colors.greenColor} />
             </View>
             <TextDefault style={styles.settingsItemText} H5>
-              {item.label}
+              Log Out
             </TextDefault>
             <Ionicons
               name="chevron-forward-outline"
@@ -122,27 +142,11 @@ function ProfileContainer(props) {
               color={colors.greenColor}
             />
           </TouchableOpacity>
-        ))}
+        </View>
 
-        {/* Logout Option */}
-        <TouchableOpacity
-          style={styles.settingsItem}
-          onPress={handleLogout}
-        >
-          <View style={styles.settingsItemIcon}>
-            <MaterialIcons name="logout" size={24} color={colors.greenColor} />
-          </View>
-          <TextDefault style={styles.settingsItemText} H5>
-            Log Out
-          </TextDefault>
-          <Ionicons
-            name="chevron-forward-outline"
-            size={20}
-            color={colors.greenColor}
-          />
-        </TouchableOpacity>
-      </View>
-    </>
+        <View style={{ height: 600 }} />
+      </ScrollView>
+    </ImageBackground>
   );
 }
 

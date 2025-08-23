@@ -25,7 +25,6 @@ function Drawer() {
       <NavigationStack.Screen name='KnowMore' component={Screen.KnowMore}/>
       <NavigationStack.Screen name='Buy' component={Screen.Buy}/>
       <NavigationStack.Screen name='EditingProfile' component={Screen.EditingProfile}/>
-      <NavigationStack.Screen name='PaymentHistory' component={Screen.PaymentHistory}/>
     </NavigationStack.Navigator>
   );
 }

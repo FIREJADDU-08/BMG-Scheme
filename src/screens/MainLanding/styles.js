@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   subtitle1: {
     color: colors.greenColor,
-    fontSize: 11, // adjust the font size as needed
+    fontSize: 14, // adjust the font size as needed
     marginLeft: '5%',
   },
   logo: {
@@ -261,8 +261,6 @@ const styles = StyleSheet.create({
     height: 30,
     marginBottom: 10,
     marginRight: 10,
-    // Ensure the image can rotate properly
-    resizeMode: 'contain'
   },
   backgroundImage: {
     flex: 1,
@@ -300,11 +298,7 @@ const styles = StyleSheet.create({
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    // Ensure the container can handle the 3D flip properly
-    overflow: 'hidden',
-    // Add perspective for 3D effect
-    transform: [{ perspective: 1000 }]
+    marginRight: 10
   }
   
 })

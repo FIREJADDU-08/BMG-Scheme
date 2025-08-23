@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "AKJ Mini Gold",
-    "scheme": "akj",
+    "name": "ajk",
+    "scheme": "ajk",
     "version": "1.0.15",
-    "description": "akj",
-    "slug": "akj-1",
-    "owner": "brightechsoftware",
+    "description": "ajk",
+    "slug": "ajk",
+    "owner": "jenish67",
     "privacy": "public",
     "androidStatusBar": {
       "backgroundColor": "#000000"
@@ -27,7 +27,7 @@
     "ios": {
       "supportsTablet": true,
       "userInterfaceStyle": "automatic",
-      "bundleIdentifier": "com.akjgold.akj",
+      "bundleIdentifier": "com.SmartKal.founder",
       "config": {
         "googleMapsApiKey": "###### Key #######"
       },
@@ -48,8 +48,8 @@
       }
     },
     "android": {
-      "versionCode": 8,
-      "package": "com.akjgold.akj",
+      "versionCode": 5,
+      "package": "com.SmartKal.founder",
       "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "automatic",
       "config": {
@@ -58,9 +58,6 @@
         }
       },
       "permissions": [
-        "com.google.android.gms.permission.AD_ID",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "plugins": [
@@ -80,7 +77,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow akj to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow Ajk to use your location."
         }
       ]
     ],
@@ -92,7 +89,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7161fbdc-f24a-45e8-b5a4-d220ad7a35f9"
+        "projectId": "eb3efd15-7863-4ea2-a44b-c952e6d7558f"
       }
     }
   }

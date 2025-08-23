@@ -17,37 +17,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
   },
-  safeArea: {
-    flex: 1,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 10,
-    left: 15,
-    zIndex: 1,
-    padding: 10,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginTop: 60,
-    marginBottom: 20,
-  },
-  titleText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.greenColor,
-  },
-  scrollViewContentContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  titleSpacer: {
-    marginTop: 10,
-  },
   scrollContainer: {
     paddingVertical: 20,
     padding:20

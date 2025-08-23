@@ -3,19 +3,17 @@ import {
   View,
   StyleSheet,
   TextInput,
+  Alert,
   Text,
   Image,
   TouchableOpacity,
   ImageBackground,
-  Platform,
-  ToastAndroid
 } from 'react-native';
 import axios from 'axios';
 import { TextDefault } from '../../components';
 import { alignment } from '../../utils';
 import { colors } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { showToast } from '../../utils/toast';
 
 function OTP({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -42,7 +40,7 @@ function OTP({ navigation }) {
 
   const handleSendOtp = async () => {
     if (!phoneNumber || !/^[6-9]\d{9}$/.test(phoneNumber)) {
-      showToast('Please enter a valid 10-digit Indian mobile number starting with 6-9.');
+      Alert.alert('Error', 'Please enter a valid 10-digit Indian mobile number starting with 6-9.');
       return;
     }
 
@@ -62,16 +60,17 @@ function OTP({ navigation }) {
       };
 
       await axios.post(apiUrl, null, { params });
-      showToast('OTP sent successfully!');
+      Alert.alert('Success', 'OTP sent successfully!');
+      // Store phone number in AsyncStorage
       try {
         await AsyncStorage.setItem('userPhoneNumber', phoneNumber);
         console.log('Phone number saved in AsyncStorage');
       } catch (storageError) {
         console.error('Failed to save phone number to AsyncStorage:', storageError);
       }
-      setIsOtpVisible(true);
+      setIsOtpVisible(true); // Show OTP input after successful OTP generation
     } catch (error) {
-      showToast('Failed to send OTP. Please try again.');
+      Alert.alert('Error', 'Failed to send OTP. Please try again.');
       console.error(error);
     }
   };
@@ -79,8 +78,10 @@ function OTP({ navigation }) {
   const handleVerifyOtp = async () => {
     if (otp.join('') === generatedOtp) {
       try {
+        // Get the stored phone number
         const storedPhoneNumber = await AsyncStorage.getItem('userPhoneNumber');
         
+        // Fetch user details using phone number
         const response = await fetch(`https://akj.brightechsoftware.com/v1/api/account/phonesearch?phoneNo=${storedPhoneNumber}`, {
           method: 'GET',
           headers: {
@@ -92,22 +93,25 @@ function OTP({ navigation }) {
         if (response.ok) {
           const data = await response.json();
           if (data && data.length > 0) {
+            // Store the username
             await AsyncStorage.setItem('userName', data[0].pname || 'User');
           }
         }
 
         await AsyncStorage.setItem('isOtpVerified', 'true');
+        // Clear any existing MPIN data
         await AsyncStorage.removeItem('mpin');
         await AsyncStorage.removeItem('isMpinCreated');
         navigation.navigate('MpinScreen', { step: 3 });
       } catch (error) {
-        showToast('Failed to save user details. Please try again.');
+        Alert.alert('Error', 'Failed to save user details. Please try again.');
         console.error(error);
       }
     } else {
-      showToast('Invalid OTP. Please try again.');
+      Alert.alert('Error', 'Invalid OTP. Please try again.');
     }
   };
+
 
   const handleOtpChange = (value, index) => {
     const newOtp = [...otp];
@@ -183,7 +187,7 @@ function OTP({ navigation }) {
         )}
 
         {/* Sign Up Text */}
-        {/* <Text style={styles.signUpText}>
+        <Text style={styles.signUpText}>
           Don't have an account?{' '}
           <Text
             style={styles.signUpLink}
@@ -191,7 +195,7 @@ function OTP({ navigation }) {
           >
             Sign Up
           </Text>
-        </Text> */}
+        </Text>
       </View>
     </ImageBackground>
   );

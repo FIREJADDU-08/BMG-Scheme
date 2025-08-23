@@ -10,15 +10,12 @@ import {
   Alert, 
   BackHandler,
   SafeAreaView,
-  Dimensions,
-  Platform,
-  ToastAndroid
+  Dimensions
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { alignment, colors } from '../../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
-import { showToast } from '../../utils/toast';
 
 const { width } = Dimensions.get('window');
 
@@ -232,32 +229,32 @@ function Buy() {
   // Validate payment inputs
   const validatePaymentInputs = () => {
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      showToast('Please enter a valid amount greater than 0');
+      Alert.alert('Invalid Amount', 'Please enter a valid amount greater than 0');
       return false;
     }
 
     if (parseFloat(amount) < 1) {
-      showToast('Minimum payment amount is ₹1');
+      Alert.alert('Minimum Amount', 'Minimum payment amount is ₹1');
       return false;
     }
 
     if (!phoneNumber || phoneNumber.length < 10) {
-      showToast('Valid phone number not found. Please login again.');
+      Alert.alert('Error', 'Valid phone number not found. Please login again.');
       return false;
     }
 
     if (!userName || userName.trim().length === 0) {
-      showToast('User name not found. Please login again.');
+      Alert.alert('Error', 'User name not found. Please login again.');
       return false;
     }
 
     if (!productData || !productData.regno || !productData.groupcode) {
-      showToast('Product details are missing. Please try again.');
+      Alert.alert('Error', 'Product details are missing. Please try again.');
       return false;
     }
 
     if (!goldRate) {
-      showToast('Gold rate not available. Please refresh and try again.');
+      Alert.alert('Error', 'Gold rate not available. Please refresh and try again.');
       return false;
     }
 
@@ -444,13 +441,15 @@ function Buy() {
   const handleWebViewNavigationStateChange = (navState) => {
     console.log('WebView navigation:', navState.url);
     
+    // Check for success/failure patterns in URL
     const url = navState.url.toLowerCase();
     if (url.includes('success') || url.includes('payment-success') || url.includes('completed')) {
+      // Don't close immediately, let the polling handle it
       console.log('Success URL detected, waiting for verification...');
     } else if (url.includes('failure') || url.includes('payment-failed') || url.includes('cancelled')) {
       clearPaymentPolling();
       setShowWebView(false);
-      showToast('Payment was not successful. Please try again.');
+      Alert.alert('Payment Failed', 'Payment was not successful. Please try again.');
     }
   };
 
@@ -459,7 +458,14 @@ function Buy() {
     const { nativeEvent } = syntheticEvent;
     console.error('WebView error:', nativeEvent);
     
-    showToast('Failed to load payment page. Please check your internet connection and try again.');
+    Alert.alert(
+      'Connection Error',
+      'Failed to load payment page. Please check your internet connection and try again.',
+      [
+        { text: 'Retry', onPress: () => setShowWebView(true) },
+        { text: 'Cancel', onPress: () => setShowWebView(false) }
+      ]
+    );
   };
 
   // WebView component
@@ -513,7 +519,6 @@ function Buy() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Gold Rate Card */}
-      {!isDreamGoldPlan && (
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Current Buying Rate</Text>
         <Text style={styles.cardSubtitle}>Value added and GST will be applicable</Text>
@@ -535,95 +540,62 @@ function Buy() {
           </View>
         </View>
       </View>
-      )}
-      {/* DREAM GOLD PLAN UI */}
-      {isDreamGoldPlan ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>DREAM GOLD PLAN</Text>
-          <View style={{ marginBottom: 20 }}>
-            <View style={styles.detailRow}><Text style={styles.detailLabel}>Group Code</Text><Text style={styles.detailValue}>{productData?.groupcode || '-'}</Text></View>
-            <View style={styles.detailRow}><Text style={styles.detailLabel}>Membership No</Text><Text style={styles.detailValue}>{productData?.regno || '-'}</Text></View>
-            <View style={styles.detailRow}><Text style={styles.detailLabel}>Scheme Amount</Text><Text style={styles.detailValue}>{productData?.amountWeight?.Amount || '-'}</Text></View>
+
+      {/* Quick Pay Card */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Quick Pay</Text>
+        <View style={styles.quickPaySection}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Amount (₹)</Text>
+            <TextInput
+              style={[styles.input, isDreamGoldPlan && styles.disabledInput]}
+              keyboardType="decimal-pad"
+              value={amount}           
+              editable={!isDreamGoldPlan && !paymentLoading}
+              onChangeText={handleAmountChange}
+              placeholder="Enter amount"
+              placeholderTextColor={colors.fontThirdColor}
+              maxLength={10}
+            />
           </View>
-          <Text style={[styles.label, { marginBottom: 10 }]}>Payment Options</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 20 }}>
-            <Image source={require('../../assets/images/gpay.jpeg')} style={{ width: 40, height: 40, marginRight: 10 }} />
+          <Text style={styles.swapIcon}>⇄</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Weight (grams)</Text>
+            <TextInput
+              style={[styles.input, styles.disabledInput]}
+              value={weight}
+              editable={false}
+              placeholder="Auto calculated"
+              placeholderTextColor={colors.fontThirdColor}
+            />
           </View>
-          <TouchableOpacity 
-            style={styles.payButton}
-            onPress={handlePay}
-            disabled={paymentLoading}
-          >
-            {paymentLoading ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.payButtonText}>PROCEED TO PAY</Text>
-            )}
-          </TouchableOpacity>
         </View>
-      ) : (
-        // Quick Pay Card (current buying container) only for DigiGold
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Quick Pay</Text>
-          <View style={[styles.quickPaySection, isDreamGoldPlan && styles.centeredSection]}>
-            <View style={[styles.inputContainer, isDreamGoldPlan && styles.fullWidthInput]}>
-              <Text style={styles.label}>Amount (₹)</Text>
-              <TextInput
-                style={[styles.input, isDreamGoldPlan && styles.disabledInput]}
-                keyboardType="decimal-pad"
-                value={amount}           
-                editable={!isDreamGoldPlan && !paymentLoading}
-                onChangeText={handleAmountChange}
-                placeholder="Enter amount"
-                placeholderTextColor={colors.fontThirdColor}
-                maxLength={10}
-              />
-            </View>
-            {/* Only show weight conversion for DigiGold plans */}
-            {!isDreamGoldPlan && (
-              <>
-                <Text style={styles.swapIcon}>⇄</Text>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Weight (grams)</Text>
-                  <TextInput
-                    style={[styles.input, styles.disabledInput]}
-                    value={weight}
-                    editable={false}
-                    placeholder="Auto calculated"
-                    placeholderTextColor={colors.fontThirdColor}
-                  />
-                </View>
-              </>
-            )}
-          </View>
-          {/* Payment Button */}
-          <TouchableOpacity 
-            style={[
-              styles.payButton, 
-              (paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0) && styles.disabledButton
-            ]} 
-            onPress={handlePay}
-            disabled={paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0}
-          >
-            {paymentLoading ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.payButtonText}>
-                {amount && goldRate ? `Pay ₹${amount}` : 'Proceed to pay'}
-              </Text>
-            )}
-          </TouchableOpacity>
-          {/* Info Text */}
-          {amount && goldRate && (
-            <Text style={styles.infoText}>
-              {isDreamGoldPlan 
-                ? `You will pay ₹${amount} for your Dream Gold plan`
-                : `You will purchase ${weight}g of 22K gold`
-              }
+
+        {/* Payment Button */}
+        <TouchableOpacity 
+          style={[
+            styles.payButton, 
+            (paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0) && styles.disabledButton
+          ]} 
+          onPress={handlePay}
+          disabled={paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0}
+        >
+          {paymentLoading ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.payButtonText}>
+              {amount && goldRate ? `Pay ₹${amount}` : 'Proceed to pay'}
             </Text>
           )}
-        </View>
-      )}
+        </TouchableOpacity>
+
+        {/* Info Text */}
+        {amount && goldRate && weight && (
+          <Text style={styles.infoText}>
+            You will purchase {weight}g of 22K gold
+          </Text>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -703,16 +675,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
-  centeredSection: {
-    justifyContent: 'center',
-  },
   inputContainer: {
     flex: 1,
     marginHorizontal: 8,
-  },
-  fullWidthInput: {
-    flex: 1,
-    marginHorizontal: 0,
   },
   label: {
     fontSize: 16,
@@ -804,20 +769,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
-    color: colors.fontThirdColor || '#666',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  detailLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.fontMainColor || '#333',
-  },
-  detailValue: {
     fontSize: 16,
     color: colors.fontThirdColor || '#666',
   },

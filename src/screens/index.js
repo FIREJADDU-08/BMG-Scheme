@@ -1,3 +1,4 @@
+
 import MainLanding from './MainLanding/MainLanding'
 import ProductDescription from './ProductDescription/ProductDescription'
 import ProfileDashboard from './ProfileDashboard/ProfileDashboard'
@@ -16,7 +17,7 @@ import CheckOut from './CheckOut/CheckOut'
 import KnowMore from './KnowMore/KnowMore'
 import Buy from './Buy/Buy'
 import EditingProfile from './EditingProfile/EditingProfile'
-import PaymentHistory from './PaymentHistory/PaymentHistory'
+
 
 export {
   MainLanding,
@@ -35,6 +36,5 @@ export {
   CheckOut,
   KnowMore,
   Buy,
-  EditingProfile,
-  PaymentHistory
+  EditingProfile
 }

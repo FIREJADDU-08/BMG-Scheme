@@ -10,33 +10,42 @@ const styles = StyleSheet.create({
     padding: scale(20),
   },
   backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
+    flex: 1,  // Take up the full screen
+    resizeMode: 'cover',  // Ensures the image covers the screen
+    justifyContent: 'flex-start',  // You can adjust this based on where you want content to align
   },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: verticalScale(20),
-  },
-  backButton: {
-    position: 'absolute',
-    top: verticalScale(10),
-    left: scale(15),
-    zIndex: 1,
-    padding: scale(10),
-  },
+  // header: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: verticalScale(20),
+  // },
+  // backButton: {
+  //   marginRight: scale(10),
+  // },
+  // headerTitle: {
+
+  //   fontSize: verticalScale(18),
+  //   color: colors.fontMainColor,
+  //   marginLeft: 115,
+  // },
   profileSection: {
     alignItems: 'center',
-    marginBottom: verticalScale(20),
-    marginTop: verticalScale(60),
+    marginBottom: verticalScale(30),
+    marginTop: verticalScale(20),
   },
-  profileIconContainer: {
+  profileImage: {
+    width: verticalScale(100),
+    height: verticalScale(100),
+    borderRadius: verticalScale(50),
     marginBottom: verticalScale(15),
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  editIcon: {
+    position: 'absolute', // Keep it absolute for overlay
+    bottom: verticalScale(40), // Align it with the bottom of the profile image
+    right: verticalScale(100), // Align it to the right of the profile image
+    backgroundColor: colors.greenColor,
+    borderRadius: verticalScale(20), // Circular shape
+    padding: scale(5),
   },
   profileName: {
     color: colors.greenColor,
@@ -57,15 +66,15 @@ const styles = StyleSheet.create({
     fontSize: verticalScale(16),
   },
   settingsSection: {
+   
     borderRadius: verticalScale(10),
     padding: verticalScale(15),
-    marginHorizontal: scale(15),
     marginBottom: verticalScale(20),
   },
   settingsItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: verticalScale(12),
+    paddingVertical: verticalScale(15),
     borderBottomWidth: 1,
     borderBottomColor: colors.grayLinesColor,
   },
@@ -74,9 +83,11 @@ const styles = StyleSheet.create({
   },
   settingsItemText: {
     flex: 1,
-    color: colors.greenColor,
-    fontSize: verticalScale(16),
+
+    // fontSize: verticalScale(16),
+    color: colors.greenColor
   },
+ 
 });
 
 export default styles;

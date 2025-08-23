@@ -2,15 +2,18 @@ import { View, Text, Image, ScrollView, TouchableOpacity, ImageBackground, Alert
 import styles from './styles';
 import React, { useEffect, useState } from 'react';
 import BottomTab from '../../components/BottomTab/BottomTab';
+import { BackHeader } from '../../components/Headers/Headers';
 import { colors } from '../../utils';
 import { TextDefault } from '../../components';
 import ProductCard from '../../ui/ProductCard/ProductCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProductCardSkeleton from '../../components/SkeletonLoader/ProductCardSkeleton';
-import { MaterialIcons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 function DiscoverPlace({ navigation }) {
+  const backPressed = () => {
+    navigation.goBack(); 
+  };
+
   const [phoneSearchData, setPhoneSearchData] = useState([]);
   const [productData, setProductData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +21,10 @@ function DiscoverPlace({ navigation }) {
   const [status, setStatus] = useState(true);
   const [accountDetails, setAccountDetails] = useState(null);
 
+  // useEffect(() => {
+    
+  //   fetchAccountDetails();
+  // }, []);
   const fetchAccountDetails = async (regno, groupcode) => {
     try {
       const response = await fetch(`https://akj.brightechsoftware.com/v1/api/account?regno=${regno}&groupcode=${groupcode}`, {
@@ -145,52 +152,44 @@ function DiscoverPlace({ navigation }) {
         style={styles.mainBackground}
         imageStyle={styles.backgroundImageStyle}
       >
-        <SafeAreaView style={styles.safeArea}>
-          {/* Back Button */}
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color={colors.greenColor} />
-          </TouchableOpacity>
+        <BackHeader backPressed={backPressed} />
 
-          {/* Title */}
-          <View style={styles.titleContainer}>
-            <Text style={styles.titleText}>Your Schemes</Text>
+        <View style={styles.title}>
+          <Text style={styles.title}>{'Your Schemes'}</Text>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContentContainer}
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.titleSpacer}>
+            {loading ? (
+              // Show skeleton loaders while loading
+              <>
+                <ProductCardSkeleton />
+                <ProductCardSkeleton />
+                <ProductCardSkeleton />
+              </>
+            ) : productData && productData.length > 0 ? (
+              productData.map((item, index) => (
+                <ProductCard
+                  key={index}
+                  productData={item}
+                  loading={loading}
+                  error={error}
+                  navigation={navigation}
+                  status={status}
+                  accountDetails={item.accountDetails}
+                />
+              ))
+            ) : (
+              <TextDefault textColor={colors.redColor}>No products available.</TextDefault>
+            )}
           </View>
+        </ScrollView>
 
-          <ScrollView
-            contentContainerStyle={styles.scrollViewContentContainer}
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.titleSpacer}>
-              {loading ? (
-                <>
-                  <ProductCardSkeleton />
-                  <ProductCardSkeleton />
-                  <ProductCardSkeleton />
-                </>
-              ) : productData && productData.length > 0 ? (
-                productData.map((item, index) => (
-                  <ProductCard
-                    key={index}
-                    productData={item}
-                    loading={loading}
-                    error={error}
-                    navigation={navigation}
-                    status={status}
-                    accountDetails={item.accountDetails}
-                  />
-                ))
-              ) : (
-                <TextDefault textColor={colors.redColor}>No products available.</TextDefault>
-              )}
-            </View>
-          </ScrollView>
-
-          <BottomTab screen="SCHEMES" />
-        </SafeAreaView>
+        <BottomTab screen="SCHEMES" style={styles.bottomTab} />
       </ImageBackground>
     </View>
   );

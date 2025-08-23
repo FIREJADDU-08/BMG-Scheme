@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, SafeAreaView, FlatList, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, FlatList, StyleSheet, ImageBackground } from 'react-native';
 import { BackHeader } from '../../components';
 import { alignment, colors, scale } from '../../utils';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -22,41 +22,18 @@ const SchemePassbook = ({ navigation, route }) => {
       year: 'numeric',
     });
   };
-
-  // Format time for payment history
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
-    const date = new Date(dateTimeString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }) + ' ' + date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
  // console.log(productData,status,accountDetails)
-  // Get payment history from accountDetails
-  const paymentHistory = accountDetails?.paymentHistoryList || [];
+  // Dynamically create transaction history from product
+  const transactionHistory = [
+    {
+      status: status || 'unknown',
+      date: productData?.joindate || new Date().toISOString(),
+      weight: productData?.amountWeight?.Weight || 0,
+      amount: parseFloat(productData?.amountWeight?.Amount) || 0,
+    }
+  ];
 
-  // Render each payment history item
-  const renderPaymentHistory = ({ item }) => {
-    return (
-      <View style={styles.transactionItem}>
-        <View style={styles.statusContainer}>
-          <Icon name="check-circle" size={15} color="#4CAF50" style={styles.statusIcon} />
-          <Text style={styles.statusText}>Paid</Text>
-        </View>
-        <Text style={styles.transactionText}>{formatDateTime(item.updateTime)}</Text>
-        <Text style={styles.transactionWText}>Inst. {item.installment}</Text>
-        <Text style={styles.transactioninrText}>₹ {item.amount}</Text>
-      </View>
-    );
-  };
-
-  // Render each transaction item (for backward compatibility)
+  // Render each transaction item
   const renderTransaction = ({ item }) => {
     const getStatusColor = (status) => {
       switch (status?.toLowerCase()) {
@@ -159,44 +136,25 @@ const SchemePassbook = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Payment History */}
+        {/* Transaction History */}
         <View style={styles.transactionContainer}>
+          <Text style={styles.transactionHeader}>Transaction History</Text>
+
+          {/* Transaction List Headers */}
           <View style={styles.transactionHeaderRow}>
-            <Text style={styles.transactionHeader}>Payment History</Text>
-            {paymentHistory.length > 0 && (
-              <TouchableOpacity
-                style={styles.viewFullHistoryButton}
-                onPress={() => navigation.navigate('PaymentHistory', {
-                  accountDetails: accountDetails,
-                  schemeName: productData?.pname || 'Scheme Details'
-                })}
-              >
-                <Text style={styles.viewFullHistoryText}>View Full History</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Payment History List Headers */}
-          <View style={styles.transactionColumnHeaderRow}>
             <Text style={styles.headerText}>Status</Text>
-            <Text style={styles.headerText}>Date & Time</Text>
-            <Text style={styles.headerText}>Installment</Text>
-            <Text style={styles.headerText}>Amount</Text>
+            <Text style={styles.headerText}>Date</Text>
+            <Text style={styles.headerText}>{isDreamGoldPlan ? 'Total Amount' : 'Weight'}</Text>
+            <Text style={styles.headerText}>INR</Text>
           </View>
 
-          {/* FlatList for Payment History */}
-          {paymentHistory.length > 0 ? (
-            <FlatList
-              data={paymentHistory.slice(0, 3)} // Show only first 3 payments in preview
-              renderItem={renderPaymentHistory}
-              keyExtractor={(item, index) => item.receiptNo || index.toString()}
-              showsVerticalScrollIndicator={false}
-            />
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No payment history available</Text>
-            </View>
-          )}
+          {/* FlatList for Transaction History */}
+          <FlatList
+            data={transactionHistory || []}  
+            renderItem={renderTransaction}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -269,15 +227,10 @@ const styles = StyleSheet.create({
   transactionHeader: {
     fontSize: scale(14),
     fontWeight: '600',
+    marginBottom: scale(16),
     color: colors.fontMainColor,
   },
   transactionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: scale(16),
-  },
-  transactionColumnHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingBottom: scale(8),
@@ -339,28 +292,6 @@ const styles = StyleSheet.create({
     color: colors.fontMainColor,
     flex: 1,
     textAlign: 'center',
-  },
-  noDataContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: scale(20),
-  },
-  noDataText: {
-    color: colors.fontMainColor,
-    fontSize: scale(12),
-    opacity: 0.5,
-  },
-  viewFullHistoryButton: {
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(6),
-    backgroundColor: colors.lightmaroon,
-    borderRadius: scale(6),
-  },
-  viewFullHistoryText: {
-    color: colors.white,
-    fontSize: scale(11),
-    fontWeight: '600',
   },
 });
 
