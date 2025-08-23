@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "akj",
+    "name": "AKJ Mini Gold",
     "scheme": "akj",
     "version": "1.0.15",
     "description": "akj",
-    "slug": "akj",
+    "slug": "akj-1",
     "owner": "brightechsoftware",
     "privacy": "public",
     "androidStatusBar": {
@@ -27,7 +27,7 @@
     "ios": {
       "supportsTablet": true,
       "userInterfaceStyle": "automatic",
-      "bundleIdentifier": "com.Smartkal.founder",
+      "bundleIdentifier": "com.akjgold.akj",
       "config": {
         "googleMapsApiKey": "###### Key #######"
       },
@@ -48,8 +48,8 @@
       }
     },
     "android": {
-      "versionCode": 6,
-      "package": "com.Smartkal.founder",
+      "versionCode": 8,
+      "package": "com.akjgold.akj",
       "googleServicesFile": "./google-services.json",
       "userInterfaceStyle": "automatic",
       "config": {
@@ -58,6 +58,9 @@
         }
       },
       "permissions": [
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "plugins": [
@@ -89,7 +92,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "d2a9965c-02b0-4386-be42-b99fe9eff162"
+        "projectId": "7161fbdc-f24a-45e8-b5a4-d220ad7a35f9"
       }
     }
   }

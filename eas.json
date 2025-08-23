@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 15.0.15",
+    "version": ">= 5.91",
     "appVersionSource": "remote"
   },
   "build": {
@@ -9,10 +9,15 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "autoIncrement": false
+      }
     },
     "production": {
-      "autoIncrement": true
+      "android": {
+        "autoIncrement": false
+      }
     },
     "apk": {
       "android": {
